@@ -7,11 +7,11 @@ from core.utils import log_markdown
 REACT_PROMPT_TEMPLATE = """
 请注意，你是一个有能力调用外部工具的智能助手。
 
-# 可用工具:
+可用工具如下:
 {tools}
 
 # 时效性原则:
-- 如果用户的问题涉及具体的时间点（如“今天”、“现在”、“本周”等），或者涉及需要实时查询的信息（如天气、新闻），你的**第一步**必须是调用 `get_current_time` 工具来获取当前的时间。
+- 如果用户的问题涉及具体的时间点（如“今天”、“现在”、“本周”、“当前”等），或者涉及需要实时查询的信息（如天气、新闻），你的**第一步**必须是调用 `get_current_time` 工具来获取当前的时间。
 - 根据获取到的当前时间，再进行后续的行动。
 
 # 回应格式:
@@ -150,8 +150,30 @@ class ReActAgent:
             self.history.append(f"Action: {action}")
             self.history.append(f"Observation: {observation}")
 
-        print("已达到最大步数，流程终止。")
-        yield {"type": "error", "content": "已达到最大步数，流程终止。"}
+        # --- 强制收敛逻辑：如果超出步数还没结果，强制进行一次总结 ---
+        print("已执行至最大步数限制，正在强制生成最终结论...")
+        yield {"type": "action", "content": "⚠️ 已达到最大尝试次数，正在根据已有信息为您总结最终结论..."}
+        
+        history_str = "\n".join(self.history)
+        fallback_prompt = f"【系统指令：强制总结】\n请根据以下已执行的步骤和观察到的信息，直接给出问题的最终结论。不要再尝试调用任何工具，不要输出思考过程，直接给出答案。\n\n观察历史:\n{history_str}\n\n原始问题: {question}"
+        messages = [{"role": "user", "content": fallback_prompt}]
+        
+        # 临时禁用思考模式以保证输出的稳定性
+        original_thinking_state = self.llm_client.enable_thinking
+        self.llm_client.enable_thinking = False
+        
+        final_summary = ""
+        for chunk in self.llm_client.think(messages=messages):
+            final_summary += chunk
+            yield {"type": "chunk", "content": chunk}
+        
+        self.llm_client.enable_thinking = original_thinking_state
+        
+        if final_summary:
+            log_markdown(f"### 🏁 强制汇总答案\n\n{final_summary}")
+            yield {"type": "answer", "content": final_summary}
+        else:
+            yield {"type": "error", "content": "已达到最大步数，且未能生成有效总结。"}
 
     def _parse_output(self, text: str):
         """解析LLM输出 Thought 和 Action。"""

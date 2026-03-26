@@ -190,15 +190,33 @@ class PlanAndSolveAgent:
             yield {"type": "error", "content": "无法生成有效的行动计划。"}
             return
 
-        # 2. 执行并推送流式结果
-        final_answer = ""
+        # 2. 执行计划并获取过程数据
+        history_trace = ""
         exec_gen = self.executor.execute(question, plan)
         try:
             while True:
                 event = next(exec_gen)
                 yield event
+                if event["type"] == "chunk":
+                     history_trace += event["content"]
         except StopIteration as e:
-            final_answer = e.value
+             history_trace = e.value
         
-        log_markdown(f"\n--- 任务完成 ---\n最终答案: {final_answer}")
-        yield {"type": "answer", "content": final_answer}
+        # 3. 强制汇总最终结论 (由于执行器每步可能只输出局部结果，这里做总和)
+        yield {"type": "action", "content": "🏁 计划执行完毕，正在为您汇总最终结论..."}
+        
+        summary_prompt = f"【系统指令：强制总结】\n请根据以下所有步骤的执行历史，为原始问题提供一个完整、最终的答案。不要展开思考过程，不要再调用工具，直接给出清晰的结论。\n\n原始问题：{question}\n\n执行详情如下：\n{history_trace}"
+        
+        # 暂时关闭思考，快速生成结论
+        original_think_state = self.llm_client.enable_thinking
+        self.llm_client.enable_thinking = False
+        
+        final_summary = ""
+        for chunk in self.llm_client.think(messages=[{"role": "user", "content": summary_prompt}]):
+            final_summary += chunk
+            yield {"type": "chunk", "content": chunk}
+        
+        self.llm_client.enable_thinking = original_think_state
+        
+        log_markdown(f"\n--- 任务完成 ---\n最终汇总答案: {final_summary}")
+        yield {"type": "answer", "content": final_summary}

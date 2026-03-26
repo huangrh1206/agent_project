@@ -35,8 +35,9 @@ pip install -r requirements.txt
 LLM_API_KEY=your_llm_api_key
 LLM_MODEL_ID=your_llm_model_id
 LLM_BASE_URL=your_llm_base_url
+# SERPAPI和Tavily是联网搜索工具，需要注册账号申请apikey，否则无法联网搜索
 SERPAPI_API_KEY=your_serpapi_key_here
-
+TAVILY_API_KEY=your_tavily_api_key_here
 ```
 
 ### 4. 运行 Agent

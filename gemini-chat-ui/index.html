@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini 1.5 - 你的 AI 助手</title>
+    <!-- Remix Icons for modern UI -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <!-- Marked.js for Markdown rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <i class="ri-menu-line menu-icon" id="menuToggle"></i>
+        </div>
+
+        <div class="new-chat" id="newChat">
+            <i class="ri-add-line"></i>
+            <span>新对话</span>
+        </div>
+
+        <div class="sidebar-title">最近</div>
+        <div class="recent-chats" id="recentChats">
+            <div class="recent-chat-item">
+                <i class="ri-chat-4-line"></i>
+                <span>如何学习 JavaScript...</span>
+            </div>
+            <div class="recent-chat-item">
+                <i class="ri-chat-4-line"></i>
+                <span>什么是 Agentic AI?</span>
+            </div>
+            <div class="recent-chat-item">
+                <i class="ri-chat-4-line"></i>
+                <span>旅行目的地建议</span>
+            </div>
+        </div>
+
+        <div class="sidebar-footer">
+            <div class="footer-item">
+                <i class="ri-question-line"></i>
+                <span>帮助</span>
+            </div>
+            <div class="footer-item">
+                <i class="ri-history-line"></i>
+                <span>活动记录</span>
+            </div>
+            <div class="footer-item">
+                <i class="ri-settings-4-line"></i>
+                <span>设置</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main">
+        <div class="nav">
+            <p class="gemini-logo">Qwen3.5-35B <i class="ri-arrow-down-s-line"></i></p>
+            <div class="user-profile">A</div>
+        </div>
+
+        <div class="container" id="container">
+            <!-- Initial Greeting Screen -->
+            <div id="greetingScreen">
+                <div class="greet">
+                    <p><span>你好，</span></p>
+                    <p style="color: var(--border-color); font-size: 40px; margin-top: -10px;">今天有什么我可以帮你的吗？</p>
+                </div>
+                <div class="cards">
+                    <div class="card" onclick="setInput('推荐一些适合周末短期旅行的城市')">
+                        <p>推荐一些适合周末短期旅行的城市</p>
+                        <i class="ri-compass-3-line"></i>
+                    </div>
+                    <div class="card" onclick="setInput('帮我写一段 Python 代码来处理 CSV 数据')">
+                        <p>帮我写一段 Python 代码来处理 CSV 数据</p>
+                        <i class="ri-code-s-slash-line"></i>
+                    </div>
+                    <div class="card" onclick="setInput('解释一下量子力学的基本概念')">
+                        <p>解释一下量子力学的基本概念</p>
+                        <i class="ri-lightbulb-line"></i>
+                    </div>
+                    <div class="card" onclick="setInput('给一个 5 岁的孩子讲个睡前故事')">
+                        <p>给一个 5 岁的孩子讲个睡前故事</p>
+                        <i class="ri-edit-2-line"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Results Area (Hidden initially) -->
+            <div id="chatArea" style="display: none; padding-bottom: 100px;">
+                <!-- User Message -->
+                <div class="result-title">
+                    <div class="user-profile" style="min-width: 40px;">A</div>
+                    <p id="userMessageText"></p>
+                </div>
+                <!-- AI Response -->
+                <div class="result-data">
+                    <div style="min-width: 40px; transform: translateY(-5px);">
+                        <i class="ri-sparkling-2-line" style="font-size: 32px; color: #4b90ff;"></i>
+                    </div>
+                    <div id="aiResponseContainer">
+                        <!-- Loader or Content will appear here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Section -->
+        <div class="main-bottom">
+            <div class="search-box" id="searchBox">
+                <!-- 隐藏的文件选择器 -->
+                <input type="file" id="fileInput" style="display: none;" accept=".docx,.pdf">
+
+                <input type="text" id="userInput" placeholder="在这里输入提示，或拖入文档 (.docx, .pdf)" autocomplete="off">
+                <div class="search-box-icons">
+                    <!-- 上传按钮 -->
+                    <i class="ri-attachment-2" id="attachBtn" title="选择文件"></i>
+
+                    <select id="agentSelector" class="agent-dropdown">
+                        <option value="Fast" selected>Fast</option>
+                        <option value="ReAct">ReAct</option>
+                        <option value="Plan&Solve">Plan&Solve</option>
+                        <option value="Reflection">Reflection</option>
+                    </select>
+
+                    <div class="thinking-selector">
+                        <span>思考</span>
+                        <label class="switch">
+                            <input type="checkbox" id="thinkingToggle">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                    <div class="send-btn-circle" id="sendBtn" style="display: none;">
+                        <i class="ri-arrow-up-line"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 上传文件预览区域 -->
+            <div id="filePreview" class="file-preview-area"></div>
+
+            <p class="bottom-info">
+                Gemini 可能会显示不准确的信息（包括关于人物的信息），因此请核实其回答。
+            </p>
+        </div>
+    </main>
+
+    <script src="main.js"></script>
+</body>
+
+</html>

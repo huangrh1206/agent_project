@@ -50,3 +50,4 @@ python main.py
 - `search_google.py`: 联网搜索引擎。
 - `word_parser.py`: Word 文档解析器。
 - `pdf_parser.py`: PDF 文本与图像 OCR 提取器。
+- `get_time.py`: 获取当前时间。

@@ -13,36 +13,36 @@
 ## 🚀 快速开始
 
 ### 1. 克隆项目
-\`\`\`bash
+```bash
 git clone https://github.com/huangrh1206/agent_project.git
 cd agent_project
-\`\`\`
+```
 
 ### 2. 配置环境
 推荐使用 Python 3.10+。
-\`\`\`bash
+```bash
 # 创建并激活虚拟环境
 python -m venv agentenv
 agentenv\Scripts\activate  # Windows
 
 # 安装依赖
 pip install -r requirements.txt
-\`\`\`
+```
 
 ### 3. 配置环境变量
 在项目根目录创建 `.env` 文件，并填入你的 API Keys：
-\`\`\`env
+```env
 LLM_API_KEY=your_llm_api_key
 LLM_MODEL_ID=your_llm_model_id
 LLM_BASE_URL=your_llm_base_url
 SERPAPI_API_KEY=your_serpapi_key_here
 
-\`\`\`
+```
 
 ### 4. 运行 Agent
-\`\`\`bash
+```bash
 python main.py
-\`\`\`
+```
 
 ## 🛠️ 工具箱目录 (Tools)
 - `search_tavily.py`: 联网搜索引擎。

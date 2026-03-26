@@ -87,7 +87,8 @@ def chat():
             tool_executor = register_all_tools()
             agent = ReActAgent(client, tool_executor)
         elif agent_type == "Plan&Solve":
-            agent = PlanAndSolveAgent(client)
+            tool_executor = register_all_tools()
+            agent = PlanAndSolveAgent(client, tool_executor)
         elif agent_type == "Reflection":
             agent = ReflectionAgent(client)
         else: # Fast
